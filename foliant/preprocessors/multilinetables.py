@@ -29,7 +29,7 @@ class Preprocessor(BasePreprocessor):
         self._table_columns_to_scale = self.options['table_columns_to_scale']
 
     def _if_table_is_table(self, new_file_data, table_to_scale):
-        if len(table_to_scale) > 2 and re.search('\W', table_to_scale[1]):
+        if len(table_to_scale) > 2 and not re.search('\w', table_to_scale[1]):
             new_file_data = self._process_table(new_file_data, table_to_scale)
         else:
             for line in table_to_scale:

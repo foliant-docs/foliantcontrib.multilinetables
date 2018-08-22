@@ -28,7 +28,18 @@ class Preprocessor(BasePreprocessor):
         self._keep_narrow_tables = self.options['keep_narrow_tables']
         self._table_columns_to_scale = self.options['table_columns_to_scale']
 
-    def process_table(self, new_file_data, table_to_scale):
+    def _if_table_is_table(self, new_file_data, table_to_scale):
+        if len(table_to_scale) > 2 and re.search('\W', table_to_scale[1]):
+            new_file_data = self._process_table(new_file_data, table_to_scale)
+        else:
+            for line in table_to_scale:
+                new_file_data.append(''.join(map(str, line)))
+
+        return new_file_data
+
+    def _process_table(self, new_file_data, table_to_scale):
+        for i, line in enumerate(table_to_scale):
+            table_to_scale[i] = line.split('|')
         table_to_scale = self._prepare_table(table_to_scale)
         scaled_table = self._scale_table(table_to_scale)
         table_to_scale = []
@@ -197,19 +208,19 @@ class Preprocessor(BasePreprocessor):
                 if '|' not in string or string.count('|') < self._table_columns_to_scale + 1:
                     if table_found:
                         table_found = False
-                        new_file_data = self.process_table(new_file_data, table_to_scale)
+                        new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
                     table_to_scale = []
 
                     new_file_data.append(string)
 
                 else:
                     table_found = True
-                    table_to_scale.append(string.split('|'))
+                    table_to_scale.append(string)
                     for item in table_to_scale[len(table_to_scale)-1]:
                         item.strip()
 
             if table_found:
-                new_file_data = self.process_table(new_file_data, table_to_scale)
+                new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
 
             with open(markdown_file_path, 'w', encoding="utf-8") as file_to_write:
                 for string in new_file_data:

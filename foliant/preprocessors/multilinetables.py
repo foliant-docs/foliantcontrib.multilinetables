@@ -14,7 +14,9 @@ class Preprocessor(BasePreprocessor):
     defaults = {
         'min_table_width': 100,
         'keep_narrow_tables': True,
-        'table_columns_to_scale': 2,
+        'table_columns_to_scale': 3,
+        'enable_hyphenation': True,
+        'hyph_combination': '<br>',
     }
 
     def __init__(self, *args, **kwargs):
@@ -27,6 +29,8 @@ class Preprocessor(BasePreprocessor):
         self._min_table_width = self.options['min_table_width']
         self._keep_narrow_tables = self.options['keep_narrow_tables']
         self._table_columns_to_scale = self.options['table_columns_to_scale']
+        self._enable_hyphenation = self.options['enable_hyphenation']
+        self._hyph_combination = self.options['hyph_combination']
 
     def _if_table_is_table(self, new_file_data, table_to_scale):
         if len(table_to_scale) > 2 and not re.search('\w', table_to_scale[1]):
@@ -85,6 +89,23 @@ class Preprocessor(BasePreprocessor):
 
         return new_table_to_scale
 
+    def _scale_cell(self, width, cell_to_cut, scaled_cell):
+        if len(cell_to_cut) < width:
+            scaled_cell.append(cell_to_cut)
+        else:
+            splitted_cell_part = cell_to_cut.split(' ')
+            cell_string = ''
+
+            for word in splitted_cell_part:
+                if (len(cell_string) + len(word)) < width:
+                    cell_string = cell_string + ' ' + word
+                else:
+                    scaled_cell.append(cell_string.strip())
+                    cell_string = word
+            scaled_cell.append(cell_string.strip())
+
+        return scaled_cell
+
     def _scale_table(self, table_to_scale):
         table_to_scale.pop(1)
         columns = list(zip(*table_to_scale))
@@ -132,24 +153,18 @@ class Preprocessor(BasePreprocessor):
             cell_hight = 1
 
             for column_number, cell in enumerate(row):
-                if len(cell) < column_widths[column_number]:
-                    scaled_row[column_number].append(cell)
+                scaled_cell = []
+                if self._enable_hyphenation and self._hyph_combination in cell:
+                    cell = cell.split(self._hyph_combination)
+                    for cell_part in cell:
+                        scaled_cell = self._scale_cell(column_widths[column_number], cell_part, scaled_cell)
                 else:
-                    splitted_cell = cell.split(' ')
-                    scaled_cell = []
-                    cell_string = ''
+                    scaled_cell = self._scale_cell(column_widths[column_number], cell, scaled_cell)
 
-                    for word in splitted_cell:
-                        if (len(cell_string) + len(word)) < column_widths[column_number]:
-                            cell_string = cell_string + ' ' + word
-                        else:
-                            scaled_cell.append(cell_string.strip())
-                            cell_string = word
-                    scaled_cell.append(cell_string.strip())
-                    scaled_row[column_number] = scaled_cell
+                if len(scaled_cell) > cell_hight:
+                    cell_hight = len(scaled_cell)
 
-                    if len(scaled_cell) > cell_hight:
-                        cell_hight = len(scaled_cell)
+                scaled_row[column_number] = scaled_cell
 
             if cell_hight > 1:
                 for cell in scaled_row:
@@ -205,7 +220,7 @@ class Preprocessor(BasePreprocessor):
 
             for string in file_data:
 
-                if '|' not in string or string.count('|') < self._table_columns_to_scale + 1:
+                if '|' not in string or len([cell for cell in string.split('|') if cell]) < self._table_columns_to_scale:
                     if table_found:
                         table_found = False
                         new_file_data = self._if_table_is_table(new_file_data, table_to_scale)

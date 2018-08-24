@@ -26,7 +26,9 @@ preprocessors:
   - multilinetables:
       min_table_width: 100
       keep_narrow_tables: true
-      table_columns_to_scale: 2
+      table_columns_to_scale: 3
+      enable_hyphenation: false
+      hyph_combination: '<br>'
 ```
 
 `min_table_width`
@@ -37,6 +39,12 @@ preprocessors:
 
 `table_columns_to_scale`
 :   Minimum amount of columns to process the table.
+
+`enable_hyphenation`
+:   Switch breaking text in multiline tables with the tag set in `hyph_combination`.
+
+`hyph_combination`
+:   Custom tag to break a text in multiline tables.
 
 
 ## Usage

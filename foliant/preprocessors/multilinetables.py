@@ -22,7 +22,7 @@ class Preprocessor(BasePreprocessor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.logger = self.logger.getChild('maketablesmultiline')
+        self.logger = self.logger.getChild('multilinetables')
 
         self.logger.debug(f'Preprocessor inited: {self.__dict__}')
 

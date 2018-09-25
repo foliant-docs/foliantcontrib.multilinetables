@@ -3,7 +3,6 @@ Preprocessor for Foliant documentation authoring tool.
 Makes markdown tables multiline before pandoc processing.
 '''
 
-
 import re
 from pathlib import Path
 
@@ -17,12 +16,13 @@ class Preprocessor(BasePreprocessor):
         'table_columns_to_scale': 3,
         'enable_hyphenation': True,
         'hyph_combination': '<br>',
+        'targets': [],
     }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.logger = self.logger.getChild('multilinetables')
+        self.logger = self.logger.getChild('maketablesmultiline')
 
         self.logger.debug(f'Preprocessor inited: {self.__dict__}')
 
@@ -207,38 +207,40 @@ class Preprocessor(BasePreprocessor):
     def apply(self):
         self.logger.info('Applying preprocessor')
 
-        for markdown_file_path in self.working_dir.rglob('*.md'):
-            self.logger.debug(f'Processing Markdown file: {markdown_file_path}')
+        if not self.options['targets'] or self.context['target'] in self.options['targets']:
 
-            with open(markdown_file_path, encoding='utf8') as file_to_read:
-                file_data = list(file_to_read)
+            for markdown_file_path in self.working_dir.rglob('*.md'):
+                self.logger.debug(f'Processing Markdown file: {markdown_file_path}')
 
-            new_file_data = []
-            table_to_scale = []
-            scaled_table = []
-            table_found = False
+                with open(markdown_file_path, encoding='utf8') as file_to_read:
+                    file_data = list(file_to_read)
 
-            for string in file_data:
+                new_file_data = []
+                table_to_scale = []
+                scaled_table = []
+                table_found = False
 
-                if '|' not in string or len([cell for cell in string.split('|') if cell]) < self._table_columns_to_scale:
-                    if table_found:
-                        table_found = False
-                        new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
-                    table_to_scale = []
+                for string in file_data:
 
-                    new_file_data.append(string)
+                    if '|' not in string or len([cell for cell in string.split('|') if cell]) < self._table_columns_to_scale:
+                        if table_found:
+                            table_found = False
+                            new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
+                        table_to_scale = []
 
-                else:
-                    table_found = True
-                    table_to_scale.append(string)
-                    for item in table_to_scale[len(table_to_scale)-1]:
-                        item.strip()
+                        new_file_data.append(string)
 
-            if table_found:
-                new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
+                    else:
+                        table_found = True
+                        table_to_scale.append(string)
+                        for item in table_to_scale[len(table_to_scale)-1]:
+                            item.strip()
 
-            with open(markdown_file_path, 'w', encoding="utf-8") as file_to_write:
-                for string in new_file_data:
-                    file_to_write.write(string)
+                if table_found:
+                    new_file_data = self._if_table_is_table(new_file_data, table_to_scale)
+
+                with open(markdown_file_path, 'w', encoding="utf-8") as file_to_write:
+                    for string in new_file_data:
+                        file_to_write.write(string)
 
         self.logger.info('Preprocessor applied')

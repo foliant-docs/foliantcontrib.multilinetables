@@ -1,3 +1,7 @@
+# 1.1.3
+
+-   'targets' option added to the preprocessor settings.
+
 # 1.1.2
 
 -   Now it's possible to break the text anywhere in multiline tables with custom tag.
@@ -10,7 +14,3 @@
 # 1.1.0
 
 -   Code strings with || operator are not perceived as a tables now.
-
-# 1.0.0
-
--   Initial release.

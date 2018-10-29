@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-SHORT_DESCRIPTION = 'Markdown tables convertor to a multiline format.'
+SHORT_DESCRIPTION = 'Markdown tables convertor to a multiline and grid format.'
 
 try:
     with open('README.md', encoding='utf8') as readme:
@@ -16,7 +16,7 @@ setup(
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    version='1.1.3',
+    version='1.2.0',
     author='Anton Bukhtiyarov',
     author_email='apkraft@gmail.com',
     url='https://github.com/foliant-docs/foliantcontrib.multilinetables',

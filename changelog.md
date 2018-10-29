@@ -1,3 +1,7 @@
+# 1.2.0
+
+-   Convertation th the grid format added for arbitrary cell' content (multiple paragraphs, code blocks, lists, etc.).
+
 # 1.1.3
 
 -   'targets' option added to the preprocessor settings.

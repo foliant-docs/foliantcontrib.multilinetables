@@ -14,8 +14,9 @@ class Preprocessor(BasePreprocessor):
         'min_table_width': 100,
         'keep_narrow_tables': True,
         'table_columns_to_scale': 3,
-        'enable_hyphenation': True,
+        'enable_hyphenation': False,
         'hyph_combination': '<br>',
+        'convert_to_grid': False,
         'targets': [],
     }
 
@@ -31,6 +32,7 @@ class Preprocessor(BasePreprocessor):
         self._table_columns_to_scale = self.options['table_columns_to_scale']
         self._enable_hyphenation = self.options['enable_hyphenation']
         self._hyph_combination = self.options['hyph_combination']
+        self._convert_to_grid = self.options['convert_to_grid']
 
     def _if_table_is_table(self, new_file_data, table_to_scale):
         if len(table_to_scale) > 2 and not re.search('\w', table_to_scale[1]):
@@ -47,6 +49,9 @@ class Preprocessor(BasePreprocessor):
         table_to_scale = self._prepare_table(table_to_scale)
         scaled_table = self._scale_table(table_to_scale)
         table_to_scale = []
+        if self._convert_to_grid:
+            scaled_table = self._mline2grid(scaled_table)
+
         for line in scaled_table:
             new_file_data.append(line)
 
@@ -203,6 +208,53 @@ class Preprocessor(BasePreprocessor):
         scaled_table.insert(len(scaled_table) - 1, ''.join(('-' * table_width, '\n')))
 
         return scaled_table
+
+    def _mline2grid(self, scaled_table):
+
+        for index in range(len(scaled_table)-2,-1,-1):
+            if scaled_table[index] == '\n':
+                if scaled_table[index-1] == '\n':
+                    scaled_table[index-1] = ''
+                    scaled_table.pop(index)
+                else:
+                    scaled_table.pop(index)
+            else:
+                if scaled_table[index].endswith('\n'):
+                    scaled_table[index] = scaled_table[index][:-2]
+                if scaled_table[index].startswith('\n'):
+                    scaled_table[index] = scaled_table[index][1:]
+        scaled_table.pop()
+
+        table_columns = []
+        row_separator = ''
+        header_separator = ''
+        for row in scaled_table:
+            if set(row) == set('- '):
+                table_columns = row.split(' ')
+                row_separator = ''.join(('+-', row.replace(' ', '+-'), '+\n'))
+                header_separator = row_separator.replace('-', '=')
+                break
+
+        grid_table = []
+
+        for row in scaled_table:
+            if set(row) == set('-') or row == '':
+                grid_table.append(row_separator)
+            elif set(row) == set('- '):
+                grid_table.append(header_separator)
+            elif set(row) == set(' '):
+                continue
+            else:
+                position = 0
+                new_row = ''
+                for column in table_columns:
+                    new_row = '| '.join((new_row, row[position:position+len(column)]))
+                    position += len(column) + 1
+                new_row += '|\n'
+                grid_table.append(new_row)
+        grid_table.append('\n')
+
+        return grid_table
 
     def apply(self):
         self.logger.info('Applying preprocessor')

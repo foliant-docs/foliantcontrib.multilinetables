@@ -5,12 +5,14 @@ Makes markdown tables multiline before pandoc processing.
 
 import re
 from pathlib import Path
+from shutil import copyfile
 
 from foliant.preprocessors.base import BasePreprocessor
 
 
 class Preprocessor(BasePreprocessor):
     defaults = {
+        'rewrite_src_files': False,
         'min_table_width': 100,
         'keep_narrow_tables': True,
         'table_columns_to_scale': 3,
@@ -27,6 +29,7 @@ class Preprocessor(BasePreprocessor):
 
         self.logger.debug(f'Preprocessor inited: {self.__dict__}')
 
+        self._rewrite_src_files = self.options['rewrite_src_files']
         self._min_table_width = self.options['min_table_width']
         self._keep_narrow_tables = self.options['keep_narrow_tables']
         self._table_columns_to_scale = self.options['table_columns_to_scale']
@@ -294,5 +297,9 @@ class Preprocessor(BasePreprocessor):
                 with open(markdown_file_path, 'w', encoding="utf-8") as file_to_write:
                     for string in new_file_data:
                         file_to_write.write(string)
+
+                src_file_path = ''.join((str(self.config['src_dir']), str(markdown_file_path).replace(str(self.working_dir), '')))
+                if self._rewrite_src_files:
+                    copyfile(markdown_file_path, src_file_path)
 
         self.logger.info('Preprocessor applied')

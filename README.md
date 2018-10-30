@@ -24,6 +24,7 @@ The preprocessor has a number of options (best values set by default):
 ```yaml
 preprocessors:
     - multilinetables:
+        rewrite_src_files: false
         min_table_width: 100
         keep_narrow_tables: true
         table_columns_to_scale: 3
@@ -34,6 +35,9 @@ preprocessors:
             - docx
             - pdf
 ```
+
+`rewrite_src_file`
+:   You can update source files after each use of preprocessor. Be careful, previous data will be deleted.
 
 `min_table_width`
 :   Wide markdown tables will be shrinked to this width in symbols. This parameter affects scaling - change it if table columns are merging.

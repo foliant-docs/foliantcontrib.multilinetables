@@ -1,3 +1,7 @@
+# 1.2.1
+
+-   Possibility to rewrite source files added.
+
 # 1.2.0
 
 -   Convertation th the grid format added for arbitrary cell' content (multiple paragraphs, code blocks, lists, etc.).

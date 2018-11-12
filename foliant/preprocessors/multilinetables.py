@@ -245,8 +245,6 @@ class Preprocessor(BasePreprocessor):
                 grid_table.append(row_separator)
             elif set(row) == set('- '):
                 grid_table.append(header_separator)
-            elif set(row) == set(' '):
-                continue
             else:
                 position = 0
                 new_row = ''

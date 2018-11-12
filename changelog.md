@@ -1,3 +1,7 @@
+# 1.2.2
+
+-   Problem with deletion of table strings containing only spaces fixed (critical for lists in grid tables).
+
 # 1.2.1
 
 -   Possibility to rewrite source files added.

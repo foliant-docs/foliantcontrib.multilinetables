@@ -1,3 +1,7 @@
+# 1.2.3
+
+-   Problem with strings containing only hyphens fixed (critical for narrow columns with lists in grid tables).
+
 # 1.2.2
 
 -   Problem with deletion of table strings containing only spaces fixed (critical for lists in grid tables).

@@ -243,7 +243,7 @@ class Preprocessor(BasePreprocessor):
         for row in scaled_table:
             if set(row) == set('-') or row == '':
                 grid_table.append(row_separator)
-            elif set(row) == set('- '):
+            elif set(row) == set('- ') and '- -' in row:
                 grid_table.append(header_separator)
             else:
                 position = 0
